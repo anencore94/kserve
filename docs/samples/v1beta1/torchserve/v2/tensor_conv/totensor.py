@@ -12,8 +12,9 @@ from PIL import Image
 from torchvision import transforms
 
 parser = argparse.ArgumentParser()
-parser.add_argument('filename', help='input filename')
+# parser.add_argument('filename', help='input filename')
 args = parser.parse_args()
+args.filename = "kitten.jpeg"
 args = vars(args)
 filename = args["filename"]
 

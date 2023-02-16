@@ -15,23 +15,24 @@ Help()
 }
 
 deploymentMode=serverless
-while getopts ":hsr" option; do
-   case $option in
-      h) # display Help
-         Help
-         exit;;
-      r) # skip knative install
-	 deploymentMode=kubernetes;;
-      s) # install knative
-         deploymentMode=serverless;;
-     \?) # Invalid option
-         echo "Error: Invalid option"
-         exit;;
-   esac
-done
+# while getopts ":hsr" option; do
+#    case $option in
+#       h) # display Help
+#          Help
+#          exit;;
+#       r) # skip knative install
+# 	 deploymentMode=kubernetes;;
+#       s) # install knative
+#          deploymentMode=serverless;;
+#      \?) # Invalid option
+#          echo "Error: Invalid option"
+#          exit;;
+#    esac
+# done
 
 export ISTIO_VERSION=1.15.0
-export KNATIVE_VERSION=knative-v1.7.0
+# export KNATIVE_VERSION=knative-v1.7.0
+export KNATIVE_VERSION=v0.26.2
 export KSERVE_VERSION=v0.10.0-rc1
 export CERT_MANAGER_VERSION=v1.3.0
 export SCRIPT_DIR="$( dirname -- "${BASH_SOURCE[0]}" )"
@@ -43,45 +44,45 @@ then
    exit 1;
 fi
 
-curl -L https://istio.io/downloadIstio | sh -
-cd istio-${ISTIO_VERSION}
+# curl -L https://istio.io/downloadIstio | sh -
+# cd istio-${ISTIO_VERSION}
 
-# Create istio-system namespace
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: istio-system
-  labels:
-    istio-injection: disabled
-EOF
+# # Create istio-system namespace
+# cat <<EOF | kubectl apply -f -
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: istio-system
+#   labels:
+#     istio-injection: disabled
+# EOF
 
-cat << EOF > ./istio-minimal-operator.yaml
-apiVersion: install.istio.io/v1beta1
-kind: IstioOperator
-spec:
-  values:
-    global:
-      proxy:
-        autoInject: disabled
-      useMCP: false
+# cat << EOF > ./istio-minimal-operator.yaml
+# apiVersion: install.istio.io/v1beta1
+# kind: IstioOperator
+# spec:
+#   values:
+#     global:
+#       proxy:
+#         autoInject: disabled
+#       useMCP: false
 
-  meshConfig:
-    accessLogFile: /dev/stdout
+#   meshConfig:
+#     accessLogFile: /dev/stdout
 
-  addonComponents:
-    pilot:
-      enabled: true
+#   addonComponents:
+#     pilot:
+#       enabled: true
 
-  components:
-    ingressGateways:
-      - name: istio-ingressgateway
-        enabled: true
-EOF
+#   components:
+#     ingressGateways:
+#       - name: istio-ingressgateway
+#         enabled: true
+# EOF
 
-bin/istioctl manifest apply -f istio-minimal-operator.yaml -y;
+# bin/istioctl manifest apply -f istio-minimal-operator.yaml -y;
 
-echo "😀 Successfully installed Istio"
+# echo "😀 Successfully installed Istio"
 
 # Install Knative
 if [ $deploymentMode = serverless ]; then

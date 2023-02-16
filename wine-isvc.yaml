@@ -1,0 +1,22 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "mlflow-v2-wine-classifier"
+spec:
+  predictor:
+    # serviceAccountName: sa-minio
+    model:
+      # Error: failed to start container "kserve-container": Error response from daemon: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: exec: "--enable_docs_url=True": executable file not found in $PATH: unknown
+      modelFormat:
+        name: mlflow
+      protocolVersion: v2
+      storageUri: "gs://kfserving-examples/models/mlflow/wine"
+      # storageUri: "s3://mlflow/mlflow/artifacts/5/c8bb9c26bac3460fbf9e56ce1cd1057f/artifacts/model-for-dummy-table"
+      # storageUri: "s3://mlflow/mlflow/artifacts/14/2eae4466f7864082813b400cf323c3d5/artifacts/test-model-4"
+      # command: ["/bin/bash","-c"]
+      # args: ["source ./hack/activate-env.sh $MLSERVER_ENV_TARBALL . && pip install cloudpickle==2.1.0 && mlserver start /mnt/models"]
+      # pip install -r /mnt/models/requirements.txt  안에 cloudpickle 이 들어있음
+      # args: ["sleep 360000"]
+
+# https://github.com/PrefectHQ/prefect/issues/5818 발생
+# kserve 등의 특정 namepsace 에서는 storage-initializer init-container 가 뜨지 않을 수 있음

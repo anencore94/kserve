@@ -4,8 +4,9 @@ import argparse
 import uuid
 
 parser = argparse.ArgumentParser()
-parser.add_argument("filename", help="converts image to bytes array", type=str)
+# parser.add_argument("filename", help="converts image to bytes array", type=str)
 args = parser.parse_args()
+args.filename = "0.png"
 
 image = open(args.filename, "rb")  # open binary file in read mode
 image_read = image.read()

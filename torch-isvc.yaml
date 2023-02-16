@@ -1,0 +1,14 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "torchserve-v2"
+spec:
+  predictor:
+    # serviceAccountName: sa-minio
+    pytorch:
+      protocolVersion: v2
+      storageUri: gs://kfserving-examples/models/torchserve/image_classifier/v1
+      # storageUri: s3://torch-test/0206/1
+      # https://kserve.github.io/website/0.9/modelserving/v1beta1/torchserve/#creating-model-storage-with-model-archive-and-config-file
+      # 원래 config.properties 가 필수는 아닌데 (https://pytorch.org/serve/configuration.html#config-properties-file)
+      # https://github.com/pytorch/serve/blob/master/docker/dockerd-entrypoint.sh 때문에 config.properties 가 필수로 들어가 있어야 함

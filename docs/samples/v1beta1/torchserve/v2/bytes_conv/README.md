@@ -15,3 +15,5 @@ python tobytes.py 0.png
 `0.json` file be created 
 
 In case of bytes input, the [custom handler](https://github.com/pytorch/serve/blob/master/examples/image_classifier/mnist/mnist_handler.py) can be used without any change - 
+
+# TODO 일단은 무조건 텐서만 가능함
