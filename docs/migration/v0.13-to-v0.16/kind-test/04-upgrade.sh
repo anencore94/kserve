@@ -19,30 +19,44 @@ for crd in inferenceservices servingruntimes clusterservingruntimes inferencegra
 done
 ok "backups written to ${HERE}/artifacts/"
 
-NEW_CHART="$(resolve_kserve_chart "${KSERVE_NEW}")"
-log "Resolved ${KSERVE_NEW} resources chart -> ${NEW_CHART}"
+# Mirror step 02's method choice so the drill is consistent end to end.
+USE_MANIFEST=false
+if [ "${INSTALL_METHOD}" = "manifest" ]; then
+  USE_MANIFEST=true
+elif ! kserve_oci_chart_available "${KSERVE_NEW}"; then
+  warn "No OCI Helm chart resolvable for ${KSERVE_NEW}; falling back to in-repo manifests"
+  USE_MANIFEST=true
+fi
 
-# ---- 4a. CRDs FIRST -------------------------------------------------------
-# CRD upgrades are additive across v0.13->v0.16 (InferenceService stays
-# v1beta1; new CRDs are added). Never `helm uninstall` the CRD chart - that
-# deletes all your InferenceServices via Kubernetes garbage collection.
-log "Upgrading KServe CRDs -> ${KSERVE_NEW}"
-helm upgrade --install kserve-crd "${KSERVE_CRD_CHART}" \
-  --version "${KSERVE_NEW}" \
-  --namespace "${KSERVE_NAMESPACE}" --wait
-
-# ---- 4b. controller SECOND ------------------------------------------------
-log "Upgrading KServe controller -> ${KSERVE_NEW}"
 # v0.16 renamed RawDeployment->Standard and Serverless->Knative. Map the mode.
 NEW_MODE="${DEPLOYMENT_MODE}"
 [ "${DEPLOYMENT_MODE}" = "RawDeployment" ] && NEW_MODE="Standard"
 [ "${DEPLOYMENT_MODE}" = "Serverless" ]    && NEW_MODE="Knative"
 log "Deployment mode ${DEPLOYMENT_MODE} -> ${NEW_MODE} (v0.16 vocabulary)"
 
-helm upgrade --install kserve "${NEW_CHART}" \
-  --version "${KSERVE_NEW}" \
-  --namespace "${KSERVE_NAMESPACE}" --wait || \
-  warn "helm --wait returned non-zero; verifying controller rollout directly"
+# The golden rule holds for BOTH methods: CRDs are applied before/with the
+# controller, and we NEVER delete the CRDs (that would GC every ISVC).
+if [ "${USE_MANIFEST}" = true ]; then
+  # kserve.yaml carries CRDs + controller; --server-side applies them in one
+  # shot and CRDs are established before the controller needs them.
+  install_kserve_from_manifest "${KSERVE_NEW}"
+else
+  NEW_CHART="$(resolve_kserve_chart "${KSERVE_NEW}")"
+  log "Resolved ${KSERVE_NEW} resources chart -> ${NEW_CHART}"
+
+  # ---- 4a. CRDs FIRST -----------------------------------------------------
+  log "Upgrading KServe CRDs -> ${KSERVE_NEW}"
+  helm upgrade --install kserve-crd "${KSERVE_CRD_CHART}" \
+    --version "${KSERVE_NEW}" \
+    --namespace "${KSERVE_NAMESPACE}" --wait
+
+  # ---- 4b. controller SECOND ----------------------------------------------
+  log "Upgrading KServe controller -> ${KSERVE_NEW}"
+  helm upgrade --install kserve "${NEW_CHART}" \
+    --version "${KSERVE_NEW}" \
+    --namespace "${KSERVE_NAMESPACE}" --wait || \
+    warn "helm --wait returned non-zero; verifying controller rollout directly"
+fi
 
 # Re-assert deployment mode in the config so the new controller keeps steering
 # existing workloads to the same runtime path.

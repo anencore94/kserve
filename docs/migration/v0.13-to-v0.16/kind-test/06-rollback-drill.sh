@@ -9,17 +9,21 @@ source "$(dirname "$0")/env.sh"
 require kubectl helm
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
-OLD_CHART="$(resolve_kserve_chart "${KSERVE_OLD}")"
-
-log "=== 6.1 Roll the controller back to ${KSERVE_OLD} (helm rollback / upgrade) ==="
-# Prefer helm's own history; fall back to an explicit downgrade.
+log "=== 6.1 Roll the controller back to ${KSERVE_OLD} ==="
+# If KServe was installed via Helm, use helm's own release history. If it was
+# installed from manifests (no helm release), re-apply the OLD manifests -
+# which downgrades the CONTROLLER image while leaving the (additive) CRDs in
+# place. Either way the CRDs are never deleted.
 if helm history kserve -n "${KSERVE_NAMESPACE}" >/dev/null 2>&1; then
+  log "Helm release found -> rolling back via helm"
+  OLD_CHART="$(resolve_kserve_chart "${KSERVE_OLD}")"
   helm rollback kserve 1 -n "${KSERVE_NAMESPACE}" --wait || \
     helm upgrade kserve "${OLD_CHART}" --version "${KSERVE_OLD}" \
       -n "${KSERVE_NAMESPACE}" --wait
 else
-  helm upgrade --install kserve "${OLD_CHART}" --version "${KSERVE_OLD}" \
-    -n "${KSERVE_NAMESPACE}" --wait
+  log "No Helm release -> re-applying ${KSERVE_OLD} manifests (controller downgrade)"
+  install_kserve_from_manifest "${KSERVE_OLD}"
+  kubectl rollout status deployment kserve-controller-manager -n "${KSERVE_NAMESPACE}" --timeout=300s || true
 fi
 
 log "=== 6.2 CRD schema: additive changes mean the OLD schema still validates OLD CRs ==="
