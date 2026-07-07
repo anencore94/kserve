@@ -1,0 +1,26 @@
+# A minimal, RawDeployment/Standard-friendly InferenceService used to prove
+# that an object CREATED on the OLD version survives the upgrade and stays
+# servable. The model is a public GCS object, so no cloud credentials are
+# needed. Namespace is created by the drill scripts.
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: sklearn-iris
+  annotations:
+    # We pin the mode on the object so the drill can later prove how the
+    # v0.13 legacy value ("RawDeployment"/"Serverless") is treated by the new
+    # controller. Scripts overwrite this with the value under test.
+    serving.kserve.io/deploymentMode: "RawDeployment"
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: sklearn
+      storageUri: "gs://kfserving-examples/models/sklearn/1.0/model"
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "256Mi"
+        limits:
+          cpu: "1"
+          memory: "1Gi"

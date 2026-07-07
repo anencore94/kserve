@@ -1,0 +1,29 @@
+
+===== v0.13.0-rc0 CRDs =====
+CRD                                                     served versions      storage
+clusterservingruntimes.serving.kserve.io                v1alpha1             v1alpha1
+clusterstoragecontainers.serving.kserve.io              v1alpha1             v1alpha1
+inferencegraphs.serving.kserve.io                       v1alpha1             v1alpha1
+inferenceservices.serving.kserve.io                     v1beta1              v1beta1
+servingruntimes.serving.kserve.io                       v1alpha1             v1alpha1
+trainedmodels.serving.kserve.io                         v1alpha1             v1alpha1
+
+===== v0.16.0 CRDs =====
+CRD                                                     served versions      storage
+clusterservingruntimes.serving.kserve.io                v1alpha1             v1alpha1
+clusterstoragecontainers.serving.kserve.io              v1alpha1             v1alpha1
+inferencegraphs.serving.kserve.io                       v1alpha1             v1alpha1
+inferencemodels.inference.networking.x-k8s.io           v1alpha2             v1alpha2
+inferencepools.inference.networking.x-k8s.io            v1alpha2             v1alpha2
+inferenceservices.serving.kserve.io                     v1beta1              v1beta1
+llminferenceserviceconfigs.serving.kserve.io            v1alpha1             v1alpha1
+llminferenceservices.serving.kserve.io                  v1alpha1             v1alpha1
+localmodelcaches.serving.kserve.io                      v1alpha1             v1alpha1
+localmodelnodegroups.serving.kserve.io                  v1alpha1             v1alpha1
+localmodelnodes.serving.kserve.io                       v1alpha1             v1alpha1
+servingruntimes.serving.kserve.io                       v1alpha1             v1alpha1
+trainedmodels.serving.kserve.io                         v1alpha1             v1alpha1
+
+===== DIFF =====
+ADDED in v0.16 : ['inferencemodels.inference.networking.x-k8s.io', 'inferencepools.inference.networking.x-k8s.io', 'llminferenceserviceconfigs.serving.kserve.io', 'llminferenceservices.serving.kserve.io', 'localmodelcaches.serving.kserve.io', 'localmodelnodegroups.serving.kserve.io', 'localmodelnodes.serving.kserve.io']
+REMOVED in v0.16: (none)
